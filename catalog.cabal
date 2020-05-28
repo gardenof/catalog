@@ -1,10 +1,10 @@
 cabal-version: 1.12
 
--- This file has been generated from package.yaml by hpack version 0.31.2.
+-- This file has been generated from package.yaml by hpack version 0.33.0.
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8d14c2c92e595a04bb8b3c9a1b1912cdc7e168a6260026e56425b878efdf5c31
+-- hash: 6d4cc4ed0f5b4095e75d1bde9c425ffec94214408f0ffe6b90f03ce5d2c41d08
 
 name:           catalog
 version:        0.1.0.0
@@ -34,6 +34,9 @@ library
       src
   build-depends:
       base >=4.7 && <5
+    , http-types
+    , wai
+    , warp
   default-language: Haskell2010
 
 executable catalog-exe
@@ -46,6 +49,9 @@ executable catalog-exe
   build-depends:
       base >=4.7 && <5
     , catalog
+    , http-types
+    , wai
+    , warp
   default-language: Haskell2010
 
 test-suite catalog-test
@@ -59,4 +65,7 @@ test-suite catalog-test
   build-depends:
       base >=4.7 && <5
     , catalog
+    , http-types
+    , wai
+    , warp
   default-language: Haskell2010
