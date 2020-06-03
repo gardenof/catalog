@@ -24,6 +24,9 @@ dependencies:
 - wai
 - http-types
 - warp
+- blaze-html
+- text
+- bytestring
 
 library:
   source-dirs: src
