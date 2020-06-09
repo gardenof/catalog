@@ -7,40 +7,28 @@ import Control.Monad (forM_)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
-import qualified Data.Text as T
 import qualified Data.ByteString.Lazy as BSL
-
-
-app :: Application
-app _ respond = do
-    putStrLn "I've done some IO here"
-    respond $ responseLBS
-        status200
-        [("Content-Type", "text/plain")]
-        "Hello, Web!"
 
 main :: IO ()
 main = do
     putStrLn $ "http://localhost:8080/"
-    run 8080 app3
+    run 8080 app
 
-appTwo :: Application
-appTwo _ respond = respond index
-
-index :: Response
-index = responseFile
-    status200
-    [("Content-Type", "text/html")]
-    "index.html"
-    Nothing
-
-app3 :: Application
-app3 request respond = respond $
+app :: Application
+app request respond = respond $
   case rawPathInfo request of
+    ""       -> index
     "/"       -> index
     "/raw/"   -> plainIndex
     "/blaze/" -> blazeIndex
+    "/about/" -> aboutUs
     _         -> notFound
+
+index :: Response
+index = responseLBS
+    status200
+    [("Content-Type", "text/html")]
+    (BHRU.renderHtml $ mainTwo overLoadedStringInfo)
 
 plainIndex :: Response
 plainIndex = responseLBS
@@ -60,11 +48,16 @@ notFound = responseLBS
     [("Content-Type", "text/plain")]
     "404 - Not Found"
 
+aboutUs :: Response
+aboutUs = responseLBS
+    status200
+    [("Content-Type", "text/html")]
+    (BHRU.renderHtml aboutUsHtml)
+
 numbersToText :: BSL.ByteString
 numbersToText =
   BHRU.renderHtml (numbers 5)
 
---Blaze
 numbers :: Int -> H.Html
 numbers n = H.docTypeHtml $ do
     H.head $ do
@@ -72,3 +65,40 @@ numbers n = H.docTypeHtml $ do
     H.body $ do
         H.p "A list of natural numbers:"
         H.ul $ forM_ [1 .. n] (H.li . H.toHtml)
+
+aboutUsHtml :: H.Html
+aboutUsHtml = H.docTypeHtml $ do
+    H.head $ do
+        H.title "About Us"
+    H.body $ do
+        H.p "trying to provide information"
+
+mainTwo :: HaskellLanguage -> H.Html
+mainTwo hl = H.docTypeHtml $ do
+  H.head $ do
+    H.title $ H.toHtml $ title hl
+  H.body $ do
+    H.p $  H.toHtml $ "Name : " <> (title hl)
+    H.p $  H.toHtml $ "Descriptiion : " <> (description hl)
+    H.p $  H.toHtml $ "Ussage : " <> (ussage hl)
+    H.p "Url : "
+    H.a $ H.toHtml (url hl)
+
+
+data HaskellLanguage = HaskellLanguage
+  { title       :: String
+  , description :: String
+  , ussage      :: String
+  , url         :: String
+  }
+
+overLoadedStringInfo :: HaskellLanguage
+overLoadedStringInfo =
+  HaskellLanguage
+    "OverloadedStrings"
+    "GHC supports overloaded string literals."
+    "{-# LANGUAGE OverloadedStrings #-}"
+    "https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_strings.html"
+
+
+
