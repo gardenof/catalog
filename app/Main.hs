@@ -83,7 +83,19 @@ mainTwo hl = H.docTypeHtml $ do
     H.p $  H.toHtml $ "Ussage : " <> (ussage hl)
     H.p "Url : "
     H.a $ H.toHtml (url hl)
+    H.p rankSelect
 
+rankSelect :: H.Html
+rankSelect =
+  H.body $ do
+    H.label $ H.toHtml ("Rank this page: "::String)
+    H.select $ do
+      H.option $ H.toHtml ("5 star"::String)
+      H.option $ H.toHtml ("4 star"::String)
+      H.option $ H.toHtml ("3 star"::String)
+      H.option $ H.toHtml ("2 star"::String)
+      H.option $ H.toHtml ("1 star"::String)
+    H.input H.! A.type_ "submit"
 
 data HaskellLanguage = HaskellLanguage
   { title       :: String
