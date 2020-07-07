@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: eef05a68416cbcc77fb09b718145bd094ae9296358a5cd8ad09e5537a9af200b
+-- hash: 1debe8486e86b0bd1c4fa858d9ce3a0ce3a9662853d526fcbf255a95427db76f
 
 name:           catalog
 version:        0.1.0.0
@@ -39,6 +39,7 @@ library
     , http-types
     , text
     , wai
+    , wai-extra
     , warp
   default-language: Haskell2010
 
@@ -57,6 +58,7 @@ executable catalog-exe
     , http-types
     , text
     , wai
+    , wai-extra
     , warp
   default-language: Haskell2010
 
@@ -76,5 +78,6 @@ test-suite catalog-test
     , http-types
     , text
     , wai
+    , wai-extra
     , warp
   default-language: Haskell2010

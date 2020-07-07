@@ -2,6 +2,7 @@
 import Network.Wai
 import Network.HTTP.Types
 import Network.Wai.Handler.Warp (run)
+import Network.Wai.Parse
 
 import Control.Monad (forM_)
 import qualified Text.Blaze.Html5 as H
@@ -15,32 +16,31 @@ main = do
     run 8080 app
 
 app :: Application
-app request respond = respond $
-  case rawPathInfo request of
-    ""       -> index
-    "/"       -> index
-    "/raw/"   -> plainIndex
-    "/blaze/" -> blazeIndex
-    "/about/" -> aboutUs
-    _         -> notFound
+app request respond = do
+  print $ rawQueryString request
+  print $ queryString request
+  print $ requestBodyLength request
+  params <- parseRequestBodyEx defaultParseRequestBodyOptions lbsBackEnd request
+  print params
+
+  respond $
+    case rawPathInfo request of
+      "/"           -> index
+      "/plainIndex" -> plainIndex
+      "/about"     -> aboutUs
+      _             -> notFound
 
 index :: Response
 index = responseLBS
     status200
     [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ mainTwo overLoadedStringInfo)
+    (BHRU.renderHtml $ libraryView overLoadedStringInfo)
 
 plainIndex :: Response
 plainIndex = responseLBS
     status200
     [("Content-Type", "text/plain")]
     "Hello, PlainText"
-
-blazeIndex :: Response
-blazeIndex = responseLBS
-    status200
-    [("Content-Type", "text/html")]
-    numbersToText
 
 notFound :: Response
 notFound = responseLBS
@@ -54,27 +54,16 @@ aboutUs = responseLBS
     [("Content-Type", "text/html")]
     (BHRU.renderHtml aboutUsHtml)
 
-numbersToText :: BSL.ByteString
-numbersToText =
-  BHRU.renderHtml (numbers 5)
-
-numbers :: Int -> H.Html
-numbers n = H.docTypeHtml $ do
-    H.head $ do
-        H.title "Natural numbers"
-    H.body $ do
-        H.p "A list of natural numbers:"
-        H.ul $ forM_ [1 .. n] (H.li . H.toHtml)
-
 aboutUsHtml :: H.Html
 aboutUsHtml = H.docTypeHtml $ do
     H.head $ do
         H.title "About Us"
     H.body $ do
+        H.p "About Us Page"
         H.p "trying to provide information"
 
-mainTwo :: HaskellLanguage -> H.Html
-mainTwo hl = H.docTypeHtml $ do
+libraryView :: HaskellLanguage -> H.Html
+libraryView hl = H.docTypeHtml $ do
   H.head $ do
     H.title $ H.toHtml $ title hl
   H.body $ do
@@ -89,13 +78,14 @@ rankSelect :: H.Html
 rankSelect =
   H.body $ do
     H.label $ H.toHtml ("Rank this page: "::String)
-    H.select $ do
-      H.option $ H.toHtml ("5 star"::String)
-      H.option $ H.toHtml ("4 star"::String)
-      H.option $ H.toHtml ("3 star"::String)
-      H.option $ H.toHtml ("2 star"::String)
-      H.option $ H.toHtml ("1 star"::String)
-    H.input H.! A.type_ "submit"
+    H.form H.! A.action "/about" H.! A.method "post" $ do
+      H.select H.! A.name "rankSelect" $ do
+        H.option H.! A.value "5" $ H.toHtml ("5 star"::String)
+        H.option H.! A.value "4" $ H.toHtml ("4 star"::String)
+        H.option H.! A.value "3" $ H.toHtml ("3 star"::String)
+        H.option H.! A.value "2" $ H.toHtml ("2 star"::String)
+        H.option H.! A.value "1" $ H.toHtml ("1 star"::String)
+      H.input H.! A.type_ "submit"
 
 data HaskellLanguage = HaskellLanguage
   { title       :: String
@@ -107,10 +97,8 @@ data HaskellLanguage = HaskellLanguage
 overLoadedStringInfo :: HaskellLanguage
 overLoadedStringInfo =
   HaskellLanguage
-    "OverloadedStrings"
-    "GHC supports overloaded string literals."
-    "{-# LANGUAGE OverloadedStrings #-}"
-    "https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_strings.html"
-
-
-
+    { title       = "OverloadedStrings"
+    , description = "GHC supports overloaded string literals."
+    , ussage      = "{-# LANGUAGE OverloadedStrings #-}"
+    , url         = "https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_strings.html"
+    }
