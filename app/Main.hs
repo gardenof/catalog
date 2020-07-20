@@ -13,24 +13,20 @@ import qualified Data.ByteString as BS
 import Data.ByteString.Char8 (unpack)
 import Network.Wai.Parse (parseRequestBody)
 
+import Schema (sqlEnv, allSchemas)
+import qualified  Database.Orville.PostgreSQL as O
+import qualified  Database.HDBC.PostgreSQL as Postgres
+
 main :: IO ()
 main = do
-    putStrLn $ "http://localhost:8080/"
-    run 8080 app
+  orvilleEnv <- sqlEnv
+  O.runOrville (O.migrateSchema allSchemas) orvilleEnv
+  putStrLn $ "http://localhost:8080/"
+  run 8080 app
 
 app :: Application
 app request respond = do
-  --print $ rawQueryString request
-  --print $ queryString request
-  --print $ requestBodyLength request
-  --params <- parseRequestBodyEx defaultParseRequestBodyOptions lbsBackEnd request
-  --print params
   parsedBody <- parseRequestBody lbsBackEnd request
-  case parsedBody of
-    (listOfParm,_) ->
-      print listOfParm
-    _ -> print "cool"
-
   respond $
     case rawPathInfo request of
       "/"           -> index

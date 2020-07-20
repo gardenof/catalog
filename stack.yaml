@@ -17,7 +17,7 @@
 #
 # resolver: ./custom-snapshot.yaml
 # resolver: https://example.com/snapshots/2018-01-01.yaml
-resolver: lts-15.11
+resolver: lts-14.7
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -39,7 +39,16 @@ packages:
 # - git: https://github.com/commercialhaskell/stack.git
 #   commit: e7b331f14bcffb8367cd58fbfc8b40ec7642100a
 #
-# extra-deps: []
+extra-deps:
+- HDBC-postgresql-2.3.2.6@sha256:6e1636b0414ae7b028a01f1a90cf3e28c14f1df7867cf2615d5357d9abcd6279
+
+# Here, we're pointing to a sha on the 0.9-development branch of orville for oracle
+- git: https://github.com/flipstone/orville
+  commit: 49f0b5996b483c046502c59e9f668d705cd2d3e8
+  subdirs:
+    - orville-oracle
+    - orville-postgresql
+
 
 # Override default flag values for local packages and extra-deps
 # flags: {}

@@ -1,2 +1,6 @@
 .stack-work/
 *~
+stack.yaml.lock
+docker-compose.override.yml
+catalog.cabal
+config

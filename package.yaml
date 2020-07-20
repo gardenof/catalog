@@ -28,6 +28,8 @@ dependencies:
 - blaze-html
 - text
 - bytestring
+- orville-postgresql
+- HDBC-postgresql
 
 library:
   source-dirs: src
@@ -51,5 +53,7 @@ tests:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Werror
+    - -Wall
     dependencies:
     - catalog
