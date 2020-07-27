@@ -4,17 +4,15 @@ import Network.HTTP.Types
 import Network.Wai.Handler.Warp (run)
 import Network.Wai.Parse
 
-import Control.Monad (forM_)
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
-import qualified Data.ByteString.Lazy as BSL
-import qualified Data.ByteString as BS
 import Data.ByteString.Char8 (unpack)
 import Network.Wai.Parse (parseRequestBody)
 
 import Schema (sqlEnv, allSchemas)
 import qualified  Database.Orville.PostgreSQL as O
+import qualified  Database.Orville.PostgreSQL.Raw as ORaw
 import qualified  Database.HDBC.PostgreSQL as Postgres
 
 main :: IO ()
@@ -22,11 +20,15 @@ main = do
   orvilleEnv <- sqlEnv
   O.runOrville (O.migrateSchema allSchemas) orvilleEnv
   putStrLn $ "http://localhost:8080/"
-  run 8080 app
+  run 8080 (app orvilleEnv)
 
-app :: Application
-app request respond = do
+app :: O.OrvilleEnv Postgres.Connection -> Application
+app orvilleEnv request respond = do
   parsedBody <- parseRequestBody lbsBackEnd request
+
+  --to stop the free twice problem
+  O.runOrville (ORaw.selectSql "SELECT 1" [] (pure ())) orvilleEnv
+
   respond $
     case rawPathInfo request of
       "/"           -> index

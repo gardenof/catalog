@@ -1,7 +1,6 @@
 module Schema (allSchemas, sqlEnv) where
 
 import            Data.Int (Int32)
-import            Data.Text (Text)
 import qualified  Database.Orville.PostgreSQL as O
 import qualified  Database.Orville.PostgreSQL.Connection as O
 
@@ -11,7 +10,7 @@ sqlEnv =
 
 sqlInfo :: IO (O.Pool O.Connection)
 sqlInfo =
-  O.createConnectionPool 1 60 5 "host=localhost port=5432 user=gardenof password="
+  O.createConnectionPool 1 60 5 "host=catalog-db port=5432 user=postgres password= master"
 
 allSchemas :: O.SchemaDefinition
 allSchemas = [ O.Table rankTable ]
