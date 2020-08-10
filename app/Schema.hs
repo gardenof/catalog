@@ -1,4 +1,4 @@
-module Schema (allSchemas, sqlEnv) where
+module Schema where
 
 import            Data.Int (Int32)
 import qualified  Database.Orville.PostgreSQL as O

@@ -1,19 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
-import Network.Wai
-import Network.HTTP.Types
-import Network.Wai.Handler.Warp (run)
-import Network.Wai.Parse
-
+import           Schema
+import           Data.ByteString.Char8 (unpack)
+import qualified Database.HDBC.PostgreSQL as Postgres
+import qualified Database.Orville.PostgreSQL as O
+import qualified Database.Orville.PostgreSQL.Raw as ORaw
+import           Network.HTTP.Types
+import           Network.Wai
+import           Network.Wai.Handler.Warp (run)
+import           Network.Wai.Parse
+import           Network.Wai.Parse (parseRequestBody)
+import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
-import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
-import Data.ByteString.Char8 (unpack)
-import Network.Wai.Parse (parseRequestBody)
-
-import Schema (sqlEnv, allSchemas)
-import qualified  Database.Orville.PostgreSQL as O
-import qualified  Database.Orville.PostgreSQL.Raw as ORaw
-import qualified  Database.HDBC.PostgreSQL as Postgres
 
 main :: IO ()
 main = do
@@ -22,20 +20,25 @@ main = do
   putStrLn $ "http://localhost:8080/"
   run 8080 (app orvilleEnv)
 
-app :: O.OrvilleEnv Postgres.Connection -> Application
+app :: O.OrvilleEnv Postgres.Connection
+    -> Request
+    -> (Response -> IO ResponseReceived)
+    -> IO ResponseReceived
 app orvilleEnv request respond = do
   parsedBody <- parseRequestBody lbsBackEnd request
 
   --to stop the free twice problem
-  O.runOrville (ORaw.selectSql "SELECT 1" [] (pure ())) orvilleEnv
+  _ <- O.runOrville (ORaw.selectSql "SELECT 1" [] (pure ())) orvilleEnv
 
-  respond $
-    case rawPathInfo request of
-      "/"           -> index
-      "/plainIndex" -> plainIndex
-      "/about"      -> aboutUs
-      "/ranked"     -> (thankYouRes $ fst parsedBody)
-      _             -> notFound
+  case rawPathInfo request of
+    "/"           -> respond index
+    "/plainIndex" -> respond plainIndex
+    "/about"      -> respond aboutUs
+    "/ranked"     -> do
+      _ <- O.runOrville (O.insertRecord rankTable (RankRecord () (Rank {rankInt = 5}))) orvilleEnv
+      respond (thankYouRes $ fst parsedBody)
+
+    _             -> respond notFound
 
 index :: Response
 index = responseLBS
