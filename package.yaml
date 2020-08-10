@@ -42,6 +42,8 @@ executables:
     - -threaded
     - -rtsopts
     - -with-rtsopts=-N
+    - -Werror
+    - -Wall
     dependencies:
     - catalog
 
