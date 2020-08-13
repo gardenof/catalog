@@ -12,6 +12,7 @@ import           Network.Wai.Parse (parseRequestBody)
 import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
 import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
+import           Data.Int (Int32)
 
 main :: IO ()
 main = do
@@ -31,7 +32,9 @@ app orvilleEnv request respond = do
   _ <- O.runOrville (ORaw.selectSql "SELECT 1" [] (pure ())) orvilleEnv
 
   case rawPathInfo request of
-    "/"           -> respond index
+    "/"           -> do
+      rankRecordList <- O.runOrville (O.selectAll rankTable mempty) orvilleEnv
+      respond (index $ avgRank rankRecordList )
     "/plainIndex" -> respond plainIndex
     "/about"      -> respond aboutUs
     "/ranked"     -> do
@@ -40,11 +43,19 @@ app orvilleEnv request respond = do
 
     _             -> respond notFound
 
-index :: Response
-index = responseLBS
+avgRank :: [RankRecord RankId] -> Float
+avgRank list =
+    (fromIntegral $ sum $ map getRank list) / (fromIntegral $ length list)
+
+getRank :: RankRecord RankId -> Int32
+getRank rankRecord =
+  rankInt $ rank rankRecord
+
+index :: Float -> Response
+index rankAvg = responseLBS
     status200
     [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ libraryView overLoadedStringInfo)
+    (BHRU.renderHtml $ libraryView overLoadedStringInfo rankAvg)
 
 plainIndex :: Response
 plainIndex = responseLBS
@@ -92,14 +103,15 @@ thanksForRankHtml rankValue = H.docTypeHtml $ do
     H.p "Thank you for Rank"
     H.p $ H.toHtml $ "Your ranked it a " <> rankValue
 
-libraryView :: HaskellLanguage -> H.Html
-libraryView hl = H.docTypeHtml $ do
+libraryView :: HaskellLanguage -> Float -> H.Html
+libraryView hl avg = H.docTypeHtml $ do
   H.head $ do
     H.title $ H.toHtml $ title hl
   H.body $ do
-    H.p $  H.toHtml $ "Name : " <> (title hl)
-    H.p $  H.toHtml $ "Descriptiion : " <> (description hl)
-    H.p $  H.toHtml $ "Ussage : " <> (ussage hl)
+    H.p $ H.toHtml $ "Name : " <> (title hl)
+    H.p $ H.toHtml $ "Descriptiion : " <> (description hl)
+    H.p $ H.toHtml $ "Ussage : " <> (ussage hl)
+    H.p $ H.toHtml $ "Rank Avg : " <> (show avg)
     H.p "Url : "
     H.a $ H.toHtml (url hl)
     H.p rankSelect
