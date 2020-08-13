@@ -1,6 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
 import           Schema
-import           Data.ByteString.Char8 (unpack)
+import           Data.ByteString.Char8 (ByteString, unpack)
 import qualified Database.HDBC.PostgreSQL as Postgres
 import qualified Database.Orville.PostgreSQL as O
 import qualified Database.Orville.PostgreSQL.Raw as ORaw
@@ -38,8 +38,16 @@ app orvilleEnv request respond = do
     "/plainIndex" -> respond plainIndex
     "/about"      -> respond aboutUs
     "/ranked"     -> do
-      _ <- O.runOrville (O.insertRecord rankTable (RankRecord () (Rank {rankInt = 5}))) orvilleEnv
-      respond (thankYouRes $ fst parsedBody)
+      let mbRankValue = lookup "rankSelect" (fst parsedBody)
+      case mbRankValue of
+        Nothing ->
+          respond notFound
+        Just rankValue -> do
+          let rankValueInt = (read(unpack rankValue)::Int32)
+          _ <- O.runOrville
+                (O.insertRecord rankTable $ RankRecord () (Rank {rankInt = rankValueInt}))
+                  orvilleEnv
+          respond (thankYouRes $ rankValue)
 
     _             -> respond notFound
 
@@ -75,17 +83,12 @@ aboutUs = responseLBS
     [("Content-Type", "text/html")]
     (BHRU.renderHtml aboutUsHtml)
 
-thankYouRes :: [Param] -> Response
-thankYouRes params = do
-  let mbRankValue = lookup "rankSelect" params
-  case mbRankValue of
-    Nothing ->
-      notFound
-    Just rankValue ->
-      responseLBS
-        status200
-        [("Content-Type", "text/html")]
-        (BHRU.renderHtml $ thanksForRankHtml $ unpack rankValue)
+thankYouRes :: ByteString -> Response
+thankYouRes selectedRank = do
+  responseLBS
+    status200
+    [("Content-Type", "text/html")]
+    (BHRU.renderHtml $ thanksForRankHtml $ unpack selectedRank)
 
 aboutUsHtml :: H.Html
 aboutUsHtml = H.docTypeHtml $ do
