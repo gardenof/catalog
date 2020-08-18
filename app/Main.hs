@@ -26,30 +26,39 @@ app :: O.OrvilleEnv Postgres.Connection
     -> (Response -> IO ResponseReceived)
     -> IO ResponseReceived
 app orvilleEnv request respond = do
-  parsedBody <- parseRequestBody lbsBackEnd request
 
   --to stop the free twice problem
   _ <- O.runOrville (ORaw.selectSql "SELECT 1" [] (pure ())) orvilleEnv
 
   case rawPathInfo request of
-    "/"           -> do
-      rankRecordList <- O.runOrville (O.selectAll rankTable mempty) orvilleEnv
-      respond (index $ avgRank rankRecordList )
+    "/"           -> mainPath respond
     "/plainIndex" -> respond plainIndex
     "/about"      -> respond aboutUs
-    "/ranked"     -> do
-      let mbRankValue = lookup "rankSelect" (fst parsedBody)
-      case mbRankValue of
-        Nothing ->
-          respond notFound
-        Just rankValue -> do
-          let rankValueInt = (read(unpack rankValue)::Int32)
-          _ <- O.runOrville
-                (O.insertRecord rankTable $ RankRecord () (Rank {rankInt = rankValueInt}))
-                  orvilleEnv
-          respond (thankYouRes $ rankValue)
-
+    "/ranked"     -> rankPath request respond
     _             -> respond notFound
+
+mainPath :: (Response -> IO ResponseReceived) -> IO ResponseReceived
+mainPath respond = do
+  orvilleEnv     <- sqlEnv
+  rankRecordList <- O.runOrville (O.selectAll rankTable mempty) orvilleEnv
+  respond (index $ avgRank rankRecordList )
+
+rankPath :: Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
+rankPath request respond = do
+  orvilleEnv      <- sqlEnv
+  parsedBody      <- parseRequestBody lbsBackEnd request
+  let mbRankValue = lookup "rankSelect" (fst parsedBody)
+
+  case mbRankValue of
+    Nothing ->
+      respond notFound
+
+    Just rankValue -> do
+      let rankValueInt = (read(unpack rankValue)::Int32)
+      _ <- O.runOrville
+            (O.insertRecord rankTable $ RankRecord () (Rank {rankInt = rankValueInt}))
+              orvilleEnv
+      respond (thankYouRes $ rankValue)
 
 avgRank :: [RankRecord RankId] -> Float
 avgRank list =
