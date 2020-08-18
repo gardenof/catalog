@@ -1,9 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 import           Schema
 import           Data.ByteString.Char8 (ByteString, unpack)
-import qualified Database.HDBC.PostgreSQL as Postgres
 import qualified Database.Orville.PostgreSQL as O
-import qualified Database.Orville.PostgreSQL.Raw as ORaw
 import           Network.HTTP.Types
 import           Network.Wai
 import           Network.Wai.Handler.Warp (run)
@@ -19,17 +17,12 @@ main = do
   orvilleEnv <- sqlEnv
   O.runOrville (O.migrateSchema allSchemas) orvilleEnv
   putStrLn $ "http://localhost:8080/"
-  run 8080 (app orvilleEnv)
+  run 8080 app
 
-app :: O.OrvilleEnv Postgres.Connection
-    -> Request
+app :: Request
     -> (Response -> IO ResponseReceived)
     -> IO ResponseReceived
-app orvilleEnv request respond = do
-
-  --to stop the free twice problem
-  _ <- O.runOrville (ORaw.selectSql "SELECT 1" [] (pure ())) orvilleEnv
-
+app request respond = do
   case rawPathInfo request of
     "/"           -> mainPath respond
     "/plainIndex" -> respond plainIndex
