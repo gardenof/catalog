@@ -1,6 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 import           Data.ByteString.Char8 (ByteString, unpack)
 import           Data.Int (Int32)
+import qualified Database.HDBC.PostgreSQL as Postgres
 import qualified Database.Orville.PostgreSQL as O
 import           Network.HTTP.Types
 import           Network.Wai
@@ -17,28 +18,32 @@ main = do
   orvilleEnv <- sqlEnv
   O.runOrville (O.migrateSchema allSchemas) orvilleEnv
   putStrLn $ "http://localhost:8080/"
-  run 8080 app
+  run 8080 (app orvilleEnv)
 
-app :: Request
+app :: O.OrvilleEnv Postgres.Connection
+    -> Request
     -> (Response -> IO ResponseReceived)
     -> IO ResponseReceived
-app request respond = do
+app orvilleEnv request respond = do
   case rawPathInfo request of
-    "/"           -> mainPath respond
+    "/"           -> mainPath orvilleEnv respond
     "/plainIndex" -> respond plainIndex
     "/about"      -> respond aboutUs
-    "/ranked"     -> rankPath request respond
+    "/ranked"     -> rankPath orvilleEnv request respond
     _             -> respond notFound
 
-mainPath :: (Response -> IO ResponseReceived) -> IO ResponseReceived
-mainPath respond = do
-  orvilleEnv     <- sqlEnv
+mainPath :: O.OrvilleEnv Postgres.Connection
+         -> (Response -> IO ResponseReceived)
+         -> IO ResponseReceived
+mainPath orvilleEnv respond = do
   rankRecordList <- O.runOrville (O.selectAll rankTable mempty) orvilleEnv
   respond (index $ avgRank rankRecordList )
 
-rankPath :: Request -> (Response -> IO ResponseReceived) -> IO ResponseReceived
-rankPath request respond = do
-  orvilleEnv      <- sqlEnv
+rankPath :: O.OrvilleEnv Postgres.Connection
+         -> Request
+         -> (Response -> IO ResponseReceived)
+         -> IO ResponseReceived
+rankPath orvilleEnv request respond = do
   parsedBody      <- parseRequestBody lbsBackEnd request
   let mbRankValue = lookup "rankSelect" (fst parsedBody)
 
