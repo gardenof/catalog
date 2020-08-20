@@ -49,7 +49,7 @@ rankPath orvilleEnv request respond = do
 
   case mbRankValue of
     Nothing ->
-      respond notFound
+      respond unprocessableEntity
 
     Just rankValue -> do
       let rankValueInt = (read(unpack rankValue)::Int32)
@@ -83,6 +83,12 @@ notFound = responseLBS
     status404
     [("Content-Type", "text/plain")]
     "404 - Not Found"
+
+unprocessableEntity :: Response
+unprocessableEntity = responseLBS
+    status422
+    [("Content-Type", "text/plain")]
+    "422 - Unprocessable Entity"
 
 aboutUs :: Response
 aboutUs = responseLBS
