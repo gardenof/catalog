@@ -35,6 +35,20 @@ libraryView hl avg = H.docTypeHtml $ do
     H.a $ H.toHtml (url hl)
     H.p rankSelect
 
+libraryViewError :: HaskellLanguage -> String -> Float -> H.Html
+libraryViewError hl errorString avg = H.docTypeHtml $ do
+  H.head $ do
+    H.title $ H.toHtml $ title hl
+  H.body $ do
+    H.p $ H.toHtml $ "Error Message = " <> errorString
+    H.p $ H.toHtml $ "Name : " <> (title hl)
+    H.p $ H.toHtml $ "Descriptiion : " <> (description hl)
+    H.p $ H.toHtml $ "Ussage : " <> (ussage hl)
+    H.p $ H.toHtml $ "Rank Avg : " <> (show avg)
+    H.p "Url : "
+    H.a $ H.toHtml (url hl)
+    H.p rankSelect
+
 rankSelect :: H.Html
 rankSelect =
   H.body $ do
