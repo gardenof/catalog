@@ -4,12 +4,12 @@ import            Data.Int (Int32)
 import qualified  Database.Orville.PostgreSQL as O
 import qualified  Database.Orville.PostgreSQL.Connection as O
 
-sqlEnv :: IO (O.OrvilleEnv O.Connection)
-sqlEnv =
-  O.newOrvilleEnv <$> sqlInfo
+createCatalogOrvilleEnv :: IO (O.OrvilleEnv O.Connection)
+createCatalogOrvilleEnv =
+  O.newOrvilleEnv <$> createCatalogConnectionPool
 
-sqlInfo :: IO (O.Pool O.Connection)
-sqlInfo =
+createCatalogConnectionPool :: IO (O.Pool O.Connection)
+createCatalogConnectionPool =
   O.createConnectionPool 1 60 5 "host=catalog-db port=5432 user=postgres password= master"
 
 allSchemas :: O.SchemaDefinition

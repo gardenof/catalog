@@ -7,15 +7,15 @@ import           Network.HTTP.Types
 import           Network.Wai
 import           Network.Wai.Handler.Warp (run)
 import           Network.Wai.Parse (parseRequestBody, lbsBackEnd)
-import           Schema
 import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
 
-import           LanguageExtension
 import           Html
+import           LanguageExtension
+import           Schema
 
 main :: IO ()
 main = do
-  orvilleEnv <- sqlEnv
+  orvilleEnv <- createCatalogOrvilleEnv
   O.runOrville (O.migrateSchema allSchemas) orvilleEnv
   putStrLn $ "http://localhost:8080/"
   run 8080 (app orvilleEnv)
