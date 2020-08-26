@@ -13,7 +13,9 @@ createCatalogConnectionPool =
   O.createConnectionPool 1 60 5 "host=catalog-db port=5432 user=postgres password= master"
 
 allSchemas :: O.SchemaDefinition
-allSchemas = [ O.Table rankTable ]
+allSchemas = [ O.Table rankTable
+             , O.Table rankTotalTable
+             ]
 
 data RankRecord key = RankRecord
   { rankId :: key
@@ -53,3 +55,53 @@ rankTable =
       , O.tblSafeToDelete = []
       , O.tblComments = O.noComments
       }
+
+rankTotalTable :: O.TableDefinition
+  (RankTotalRecord RankTotalId) (RankTotalRecord ()) RankTotalId
+rankTotalTable =
+  O.mkTableDefinition $
+    O.TableParams
+      { O.tblName = "rank_total"
+      , O.tblPrimaryKey = rankTotalIdField
+      , O.tblMapper =
+          RankTotalRecord
+            <$> O.readOnlyField rankTotalIdField
+            <*> O.attrField rankCount rankCountField
+            <*> O.attrField rankSum rankSumField
+      , O.tblGetKey = rankTotalId
+      , O.tblSafeToDelete = []
+      , O.tblComments = O.noComments
+      }
+
+rankTotalIdField :: O.FieldDefinition RankTotalId
+rankTotalIdField =
+  O.automaticIdField "id" `O.withFlag` O.PrimaryKey `O.withConversion`
+  O.convertSqlType rankTotalIdInt RankTotalId
+
+rankCountField :: O.FieldDefinition RankCount
+rankCountField =
+  O.int32Field "rank_count" `O.withConversion`
+  O.convertSqlType rankCountInt RankCount
+
+rankSumField :: O.FieldDefinition RankSum
+rankSumField =
+  O.int32Field "rank_sum" `O.withConversion`
+  O.convertSqlType rankSumInt RankSum
+
+data RankTotalRecord key = RankTotalRecord
+  { rankTotalId :: key
+  , rankCount   :: RankCount
+  , rankSum     :: RankSum
+  }
+
+newtype RankTotalId = RankTotalId
+  { rankTotalIdInt :: Int32
+  } deriving (Show, Eq, Ord)
+
+newtype RankCount = RankCount
+  { rankCountInt :: Int32
+  } deriving (Show, Eq, Ord)
+
+newtype RankSum = RankSum
+  { rankSumInt :: Int32
+  } deriving (Show, Eq, Ord)
