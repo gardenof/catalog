@@ -4,6 +4,8 @@ import            Data.Int (Int32)
 import qualified  Database.Orville.PostgreSQL as O
 import qualified  Database.Orville.PostgreSQL.Connection as O
 
+import            LanguageExtension
+
 createCatalogOrvilleEnv :: IO (O.OrvilleEnv O.Connection)
 createCatalogOrvilleEnv =
   O.newOrvilleEnv <$> createCatalogConnectionPool
@@ -66,6 +68,7 @@ rankTotalTable =
       , O.tblMapper =
           RankTotalRecord
             <$> O.readOnlyField rankTotalIdField
+            <*> O.attrField extensionId extensionIdField
             <*> O.attrField rankCount rankCountField
             <*> O.attrField rankSum rankSumField
       , O.tblGetKey = rankTotalId
@@ -88,10 +91,16 @@ rankSumField =
   O.int32Field "rank_sum" `O.withConversion`
   O.convertSqlType rankSumInt RankSum
 
+extensionIdField :: O.FieldDefinition ExtensionId
+extensionIdField =
+  O.textField "extension_id" 35 `O.withConversion`
+  O.convertSqlType extensionIdToString ExtensionId
+
 data RankTotalRecord key = RankTotalRecord
-  { rankTotalId :: key
-  , rankCount   :: RankCount
-  , rankSum     :: RankSum
+  { rankTotalId   :: key
+  , extensionId   :: ExtensionId
+  , rankCount     :: RankCount
+  , rankSum       :: RankSum
   }
 
 newtype RankTotalId = RankTotalId
