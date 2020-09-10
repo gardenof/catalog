@@ -1,11 +1,10 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Schema where
 
-import            Data.Int (Int32)
 import qualified  Database.Orville.PostgreSQL as O
 import qualified  Database.Orville.PostgreSQL.Connection as O
 
 import            LanguageExtension
+import            Types
 
 createCatalogOrvilleEnv :: IO (O.OrvilleEnv O.Connection)
 createCatalogOrvilleEnv =
@@ -19,19 +18,6 @@ allSchemas :: O.SchemaDefinition
 allSchemas = [ O.Table rankTable
              , O.Table rankTotalTable
              ]
-
-data RankRecord key = RankRecord
-  { rankId :: key
-  , rank   :: Rank
-  }
-
-newtype RankId = RankId
-  { rankIdInt :: Int32
-  } deriving (Show, Eq, Ord)
-
-newtype Rank = Rank
-  { rankInt :: Int32
-  } deriving (Show, Eq, Ord)
 
 rankIdField :: O.FieldDefinition RankId
 rankIdField =
@@ -96,23 +82,3 @@ extensionIdField :: O.FieldDefinition ExtensionId
 extensionIdField =
   O.textField "extension_id" 35 `O.withConversion`
   O.convertSqlType extensionIdToString ExtensionId
-
-data RankTotalRecord key =
-  RankTotalRecord
-    { rankTotalId   :: key
-    , extensionId   :: ExtensionId
-    , rankCount     :: RankCount
-    , rankSum       :: RankSum
-    } deriving Show
-
-newtype RankTotalId = RankTotalId
-  { rankTotalIdInt :: Int32
-  } deriving (Show, Eq, Ord)
-
-newtype RankCount = RankCount
-  { rankCountInt :: Int32
-  } deriving (Show, Eq, Ord, Num)
-
-newtype RankSum = RankSum
-  { rankSumInt :: Int32
-  } deriving (Show, Eq, Ord)

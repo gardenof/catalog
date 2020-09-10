@@ -13,6 +13,7 @@ import           Text.Read (readMaybe)
 import           Html
 import           LanguageExtension
 import           Schema
+import           Types
 
 main :: IO ()
 main = do

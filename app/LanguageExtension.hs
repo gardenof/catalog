@@ -1,9 +1,7 @@
 module LanguageExtension where
 
 import qualified Data.Text as T
-
-newtype ExtensionId = ExtensionId T.Text
-  deriving Show
+import           Types
 
 extensionIdToString :: ExtensionId -> T.Text
 extensionIdToString (ExtensionId extensionIdString) =
