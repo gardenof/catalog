@@ -34,17 +34,29 @@ app orvilleEnv request respond = do
     "/ranked"     -> rankPath orvilleEnv request respond
     _             -> respond notFound
 
+rankTotalAverage :: [RankTotalRecord RankTotalId]->  Float
+rankTotalAverage rankRecordList = do
+  case rankRecordList of
+    [] -> 0
+    [(RankTotalRecord _ _ rtrCount rtrSum)] -> do
+      let
+        totalSum = rankSumInt rtrSum
+        totalCount = rankCountInt rtrCount
+      (fromIntegral totalSum) / (fromIntegral totalCount)
+    _ -> 0
+
 indexPath :: O.OrvilleEnv Postgres.Connection
          -> (Response -> IO ResponseReceived)
          -> Maybe String
          -> IO ResponseReceived
 indexPath orvilleEnv respond mbErrorMessage = do
-  rankRecordList <- O.runOrville (O.selectAll rankTable mempty) orvilleEnv
+  foundRankTotalRecord <- findRankTotalRecord (extension overLoadedStringInfo) orvilleEnv
+
   case mbErrorMessage of
     Nothing ->
-      respond (index $ avgRank rankRecordList )
+      respond (index $ rankTotalAverage foundRankTotalRecord)
     Just eMessage ->
-      respond (indexParameterError (avgRank rankRecordList) eMessage)
+      respond (indexParameterError (rankTotalAverage foundRankTotalRecord) eMessage)
 
 rankPath :: O.OrvilleEnv Postgres.Connection
          -> Request
@@ -125,14 +137,6 @@ validNumberValue mbByteString =
   case mbByteString of
     Nothing         -> Nothing
     Just byteString -> readMaybe $ unpack byteString
-
-avgRank :: [RankRecord RankId] -> Float
-avgRank list =
-    (fromIntegral $ sum $ map getRank list) / (fromIntegral $ length list)
-
-getRank :: RankRecord RankId -> Int32
-getRank rankRecord =
-  rankInt $ rank rankRecord
 
 index :: Float -> Response
 index rankAvg = responseLBS
