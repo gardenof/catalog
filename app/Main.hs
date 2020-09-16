@@ -28,11 +28,18 @@ app :: O.OrvilleEnv Postgres.Connection
     -> IO ResponseReceived
 app orvilleEnv request respond = do
   case rawPathInfo request of
-    "/"           -> indexPath orvilleEnv respond Nothing
-    "/plainIndex" -> respond plainIndex
-    "/about"      -> respond aboutUs
-    "/ranked"     -> rankPath orvilleEnv request respond
-    _             -> respond notFound
+    "/"                 -> indexPath orvilleEnv respond Nothing
+    "/negativeliterals" -> respond negativeliteralsPage
+    "/plainIndex"       -> respond plainIndex
+    "/about"            -> respond aboutUs
+    "/ranked"           -> rankPath orvilleEnv request respond
+    _                   -> respond notFound
+
+negativeliteralsPage :: Response
+negativeliteralsPage = responseLBS
+    status200
+    [("Content-Type", "text/html")]
+    (BHRU.renderHtml $ negativeliteralsHtml negativeliteralsInfo)
 
 rankTotalAverage :: [RankTotalRecord RankTotalId]->  Float
 rankTotalAverage rankRecordList = do

@@ -6,6 +6,15 @@ import qualified Text.Blaze.Html5.Attributes as A
 
 import           LanguageExtension
 
+negativeliteralsHtml :: LanguageExtension -> H.Html
+negativeliteralsHtml hl = H.docTypeHtml $ do
+  H.head $ do
+    H.title $ H.toHtml $ name hl
+  H.body $ do
+    H.p $ H.toHtml $ "Name : " <> (name hl)
+    H.p $ H.toHtml $ "Descriptiion : " <> (description hl)
+    H.p $ H.toHtml $ "Ussage : " <> (ussage hl)
+
 aboutUsHtml :: H.Html
 aboutUsHtml = H.docTypeHtml $ do
     H.head $ do
@@ -22,7 +31,7 @@ thanksForRankHtml rankValue = H.docTypeHtml $ do
     H.p "Thank you for Rank"
     H.p $ H.toHtml $ "Your ranked it a " <> rankValue
 
-libraryView :: HaskellLanguage -> Float -> H.Html
+libraryView :: LanguageExtension -> Float -> H.Html
 libraryView hl avg = H.docTypeHtml $ do
   H.head $ do
     H.title $ H.toHtml $ name hl
@@ -35,7 +44,7 @@ libraryView hl avg = H.docTypeHtml $ do
     H.a $ H.toHtml (url hl)
     H.p rankSelect
 
-libraryViewError :: HaskellLanguage -> String -> Float -> H.Html
+libraryViewError :: LanguageExtension -> String -> Float -> H.Html
 libraryViewError hl errorString avg = H.docTypeHtml $ do
   H.head $ do
     H.title $ H.toHtml $ name hl

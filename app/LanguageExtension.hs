@@ -7,7 +7,7 @@ extensionIdToString :: ExtensionId -> T.Text
 extensionIdToString (ExtensionId extensionIdString) =
   extensionIdString
 
-data HaskellLanguage = HaskellLanguage
+data LanguageExtension = LanguageExtension
   { description :: String
   , extension   :: ExtensionId
   , name        :: String
@@ -15,12 +15,22 @@ data HaskellLanguage = HaskellLanguage
   , ussage      :: String
   }
 
-overLoadedStringInfo :: HaskellLanguage
+overLoadedStringInfo :: LanguageExtension
 overLoadedStringInfo =
-  HaskellLanguage
+  LanguageExtension
   { description = "GHC supports overloaded string literals."
   , extension   = ExtensionId (T.pack "OverloadedStrings")
   , name        = "Overloaded string literals"
   , url         = "https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/overloaded_strings.html"
   , ussage      = "{-# LANGUAGE OverloadedStrings #-}"
+  }
+
+negativeliteralsInfo :: LanguageExtension
+negativeliteralsInfo =
+  LanguageExtension
+  { description = "Enable negative numeric literals."
+  , extension   = ExtensionId (T.pack "NegativeLiterals")
+  , name        = "Negative literals"
+  , url         = "https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/negative_literals.html"
+  , ussage      = "{-# LANGUAGE NegativeLiterals #-}"
   }
