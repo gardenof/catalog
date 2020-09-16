@@ -31,8 +31,8 @@ thanksForRankHtml rankValue = H.docTypeHtml $ do
     H.p "Thank you for Rank"
     H.p $ H.toHtml $ "Your ranked it a " <> rankValue
 
-libraryView :: LanguageExtension -> Float -> H.Html
-libraryView lE avg = H.docTypeHtml $ do
+languageExtensionView :: LanguageExtension -> Float -> H.Html
+languageExtensionView lE avg = H.docTypeHtml $ do
   H.head $ do
     H.title $ H.toHtml $ name lE
   H.body $ do
@@ -44,8 +44,8 @@ libraryView lE avg = H.docTypeHtml $ do
     H.a $ H.toHtml (url lE)
     H.p $ rankSelect lE
 
-libraryViewError :: LanguageExtension -> String -> Float -> H.Html
-libraryViewError lE errorString avg = H.docTypeHtml $ do
+languageExtensionErrorView :: LanguageExtension -> String -> Float -> H.Html
+languageExtensionErrorView lE errorString avg = H.docTypeHtml $ do
   H.head $ do
     H.title $ H.toHtml $ name lE
   H.body $ do
