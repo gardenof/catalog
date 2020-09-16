@@ -3,9 +3,9 @@ module LanguageExtension where
 import qualified Data.Text as T
 import           Types
 
-extensionIdToString :: ExtensionId -> T.Text
-extensionIdToString (ExtensionId extensionIdString) =
-  extensionIdString
+extensionIdToText :: ExtensionId -> T.Text
+extensionIdToText (ExtensionId extensionIdText) =
+  extensionIdText
 
 data LanguageExtension = LanguageExtension
   { description :: String

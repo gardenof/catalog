@@ -81,4 +81,4 @@ rankSumField =
 extensionIdField :: O.FieldDefinition ExtensionId
 extensionIdField =
   O.textField "extension_id" 35 `O.withConversion`
-  O.convertSqlType extensionIdToString ExtensionId
+  O.convertSqlType extensionIdToText ExtensionId

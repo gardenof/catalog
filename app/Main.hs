@@ -9,6 +9,7 @@ import           Network.Wai.Handler.Warp (run)
 import           Network.Wai.Parse (parseRequestBody, lbsBackEnd)
 import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
 import           Text.Read (readMaybe)
+import qualified Data.Text as T
 
 import           Html
 import           LanguageExtension
@@ -72,19 +73,20 @@ rankPath :: O.OrvilleEnv Postgres.Connection
 rankPath orvilleEnv request respond = do
   parsedBody      <- parseRequestBody lbsBackEnd request
   let mbRankValue = lookup "rankSelect" (fst parsedBody)
+      mbLEValue   = lookup "exetnsion"  (fst parsedBody)
 
-  case validRank mbRankValue of
-    Nothing ->
-      indexPath orvilleEnv respond (Just errorMessage)
-    Just rankValue -> do
+  case (validRank mbRankValue, validExtension mbLEValue) of
+    (Just rankValue, Just langExt) -> do
       _ <- O.runOrville
              (O.insertRecord rankTable $ RankRecord () rankValue)
              orvilleEnv
       _ <- checkAndUpdateTotalRank
-             ( extension overLoadedStringInfo )
+             langExt
              rankValue
              orvilleEnv
       respond (thankYouRes $ (show $ rankInt rankValue))
+    (_, _) ->
+      indexPath orvilleEnv respond (Just errorMessage)
 
 checkAndUpdateTotalRank :: ExtensionId
                         -> Rank
@@ -139,6 +141,14 @@ validRank :: Maybe ByteString -> Maybe Rank
 validRank maBs =
   Rank <$> validNumberValue maBs
 
+validExtension :: Maybe ByteString -> Maybe ExtensionId
+validExtension maBs =
+  ExtensionId <$>  (T.pack <$> validString maBs)
+
+validString :: Maybe ByteString -> Maybe String
+validString maBs =
+  unpack <$> maBs
+
 validNumberValue :: Maybe ByteString -> Maybe Int32
 validNumberValue mbByteString =
   case mbByteString of
@@ -159,7 +169,7 @@ indexParameterError rankAvg message = responseLBS
 
 errorMessage :: String
 errorMessage =
-  "Sorry something went wrong we didn't get your rank, please try again."
+  "Sorry something went wrong, please try again."
 
 plainIndex :: Response
 plainIndex = responseLBS
