@@ -1,8 +1,10 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Types where
 
-import            Data.Int (Int32)
-import qualified  Data.Text as T
+import           Data.ByteString.Char8 (ByteString, unpack)
+import           Data.Int (Int32)
+import           Text.Read (readMaybe)
+import qualified Data.Text as T
 
 data RankRecord key = RankRecord
   { rankId :: key
@@ -38,3 +40,26 @@ newtype RankSum = RankSum
 newtype RankTotalId = RankTotalId
   { rankTotalIdInt :: Int32
   } deriving (Show, Eq, Ord)
+
+validRank :: Maybe ByteString -> Maybe Rank
+validRank maBs =
+  Rank <$> validNumberValue maBs
+
+validExtension :: Maybe ByteString -> Maybe ExtensionId
+validExtension maBs =
+  ExtensionId <$>  (T.pack <$> validString maBs)
+
+validString :: Maybe ByteString -> Maybe String
+validString maBs =
+  unpack <$> maBs
+
+validNumberValue :: Maybe ByteString -> Maybe Int32
+validNumberValue mbByteString =
+  case mbByteString of
+    Nothing         -> Nothing
+    Just byteString -> readMaybe $ unpack byteString
+
+errorMessage :: String
+errorMessage =
+  "Sorry something went wrong, please try again."
+

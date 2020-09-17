@@ -1,6 +1,4 @@
 {-# LANGUAGE OverloadedStrings #-}
-import           Data.ByteString.Char8 (ByteString, unpack)
-import           Data.Int (Int32)
 import qualified Database.HDBC.PostgreSQL as Postgres
 import qualified Database.Orville.PostgreSQL as O
 import           Network.HTTP.Types
@@ -8,18 +6,17 @@ import           Network.Wai
 import           Network.Wai.Handler.Warp (run)
 import           Network.Wai.Parse (parseRequestBody, lbsBackEnd)
 import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
-import           Text.Read (readMaybe)
-import qualified Data.Text as T
 
 import           Html
 import           LanguageExtension
 import           Schema
 import           Types
+import           RunOnOrville
 
 main :: IO ()
 main = do
   orvilleEnv <- createCatalogOrvilleEnv
-  O.runOrville (O.migrateSchema allSchemas) orvilleEnv
+  runMigrations orvilleEnv
   putStrLn $ "http://localhost:8080/"
   run 8080 (app orvilleEnv)
 
@@ -172,24 +169,6 @@ findRankTotalRecord eId orvilleEnv = do
     )
     orvilleEnv
 
-validRank :: Maybe ByteString -> Maybe Rank
-validRank maBs =
-  Rank <$> validNumberValue maBs
-
-validExtension :: Maybe ByteString -> Maybe ExtensionId
-validExtension maBs =
-  ExtensionId <$>  (T.pack <$> validString maBs)
-
-validString :: Maybe ByteString -> Maybe String
-validString maBs =
-  unpack <$> maBs
-
-validNumberValue :: Maybe ByteString -> Maybe Int32
-validNumberValue mbByteString =
-  case mbByteString of
-    Nothing         -> Nothing
-    Just byteString -> readMaybe $ unpack byteString
-
 index :: Float -> Response
 index rankAvg = responseLBS
     status200
@@ -201,10 +180,6 @@ indexParameterError rankAvg message = responseLBS
     status422
     [("Content-Type", "text/html")]
     (BHRU.renderHtml $ languageExtensionErrorView overLoadedStringInfo message rankAvg )
-
-errorMessage :: String
-errorMessage =
-  "Sorry something went wrong, please try again."
 
 notFound :: Response
 notFound = responseLBS
