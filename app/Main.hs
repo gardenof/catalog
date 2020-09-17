@@ -29,13 +29,18 @@ app :: O.OrvilleEnv Postgres.Connection
     -> IO ResponseReceived
 app orvilleEnv request respond = do
   case rawPathInfo request of
-    "/"                 -> indexPath orvilleEnv respond Nothing
-    "/negativeliterals" -> languageExtensionPath orvilleEnv respond negativeliteralsInfo Nothing
-    "/overloadedstring" -> languageExtensionPath orvilleEnv respond overLoadedStringInfo Nothing
-    "/plainIndex"       -> respond plainIndex
-    "/about"            -> respond aboutUs
-    "/ranked"           -> rankPath orvilleEnv request respond
-    _                   -> respond notFound
+    "/"                  -> respond mainPath
+    "/NegativeLiterals"  -> languageExtensionPath orvilleEnv respond negativeliteralsInfo Nothing
+    "/OverloadedStrings" -> languageExtensionPath orvilleEnv respond overLoadedStringInfo Nothing
+    "/about"             -> respond aboutUs
+    "/ranked"            -> rankPath orvilleEnv request respond
+    _                    -> respond notFound
+
+mainPath :: Response
+mainPath = responseLBS
+    status200
+    [("Content-Type", "text/html")]
+    (BHRU.renderHtml mainHtml )
 
 rankTotalAverage :: [RankTotalRecord RankTotalId]->  Float
 rankTotalAverage rankRecordList = do
@@ -200,12 +205,6 @@ indexParameterError rankAvg message = responseLBS
 errorMessage :: String
 errorMessage =
   "Sorry something went wrong, please try again."
-
-plainIndex :: Response
-plainIndex = responseLBS
-    status200
-    [("Content-Type", "text/plain")]
-    "Hello, PlainText"
 
 notFound :: Response
 notFound = responseLBS

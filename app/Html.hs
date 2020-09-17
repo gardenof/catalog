@@ -6,14 +6,14 @@ import qualified Text.Blaze.Html5.Attributes as A
 
 import           LanguageExtension
 
-negativeliteralsHtml :: LanguageExtension -> H.Html
-negativeliteralsHtml lE = H.docTypeHtml $ do
+mainHtml:: H.Html
+mainHtml = H.docTypeHtml $ do
   H.head $ do
-    H.title $ H.toHtml $ name lE
+    H.title "Language Extensions"
   H.body $ do
-    H.p $ H.toHtml $ "Name : " <> (name lE)
-    H.p $ H.toHtml $ "Descriptiion : " <> (description lE)
-    H.p $ H.toHtml $ "Ussage : " <> (ussage lE)
+    H.p $ "Language Extensions"
+    H.p $ H.a H.! A.href "OverloadedStrings" $ "Overloaded string literals"
+    H.p $ H.a H.! A.href "NegativeLiterals" $ "Negative literals"
 
 aboutUsHtml :: H.Html
 aboutUsHtml = H.docTypeHtml $ do
