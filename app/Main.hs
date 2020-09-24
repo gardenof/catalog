@@ -31,6 +31,7 @@ app orvilleEnv request respond = do
     "/OverloadedStrings" -> languageExtensionPath orvilleEnv respond overLoadedStringInfo Nothing
     "/about"             -> respond aboutUs
     "/ranked"            -> rankPath orvilleEnv request respond
+    "/mainCss"           -> respond mainCssPath
     _                    -> respond notFound
 
 mainPath :: Response
@@ -39,7 +40,20 @@ mainPath = responseLBS
     [("Content-Type", "text/html")]
     (BHRU.renderHtml mainHtml )
 
-rankTotalAverage :: [RankTotalRecord RankTotalId]->  Float
+mainCssPath :: Response
+mainCssPath = responseLBS
+    status200
+    [("Content-Type", "text/css")]
+    " h2 {font-size: 34px;} \
+    \ \
+    \ h3 {font-size: 28px}\
+    \ \
+    \ h2, h3 { font-family: inherit ;\
+    \ margin-top: 22px; margin-bottom: 11px; font-weight: 500; line-height: 1.1; color: inherit }\
+    \ .Extension { padding-left: 15px; padding-right: 15px }\
+    \ "
+
+rankTotalAverage :: [RankTotalRecord RankTotalId] -> Float
 rankTotalAverage rankRecordList = do
   case rankRecordList of
     [] -> 0

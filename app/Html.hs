@@ -9,11 +9,29 @@ import           LanguageExtension
 mainHtml:: H.Html
 mainHtml = H.docTypeHtml $ do
   H.head $ do
-    H.title "Language Extensions"
+    H.link H.! A.rel "stylesheet" H.! A.type_ "text/css" H.! A.href "mainCss"
   H.body $ do
-    H.p $ "Language Extensions"
-    H.p $ H.a H.! A.href "OverloadedStrings" $ "Overloaded string literals"
-    H.p $ H.a H.! A.href "NegativeLiterals" $ "Negative literals"
+    H.toHtml $ H.div H.! A.class_ "container" $
+      H.toHtml $ H.div H.! A.class_ "Extensions" $ do
+        H.h2 $ "Language Extensions"
+        H.toHtml $ H.div H.! A.class_ "Extension" $ do
+          H.h3 $ H.a H.! A.href "OverloadedStrings" $ "Overloaded string literals"
+          H.p
+            " GHC supports overloaded string literals.\
+            \ Normally a string literal has type String,\
+            \ but with overloaded string literals enabled\
+            \ (with OverloadedStrings) a string literal has\
+            \ type (IsString a) => a.\
+            \ "
+        H.toHtml $ H.div H.! A.class_ "Extension" $ do
+          H.h3 $ H.a H.! A.href "NegativeLiterals" $"Negative literals"
+          H.p
+            " The literal -123 is, according to Haskell98 and Haskell\
+            \ 2010, two tokens, a unary minus (-) and the number 123,\
+            \ and is desugared as negate (fromInteger 123). The language\
+            \ extension NegativeLiterals causes it to be treated as a\
+            \ single token and desugared as fromInteger (-123).\
+            \ "
 
 aboutUsHtml :: H.Html
 aboutUsHtml = H.docTypeHtml $ do
