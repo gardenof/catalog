@@ -123,9 +123,7 @@ rankPath orvilleEnv request respond = do
 
   case (validRank mbRankValue, validExtension mbLEValue) of
     (Just rankValue, Just langExt) -> do
-      _ <- O.runOrville
-             (O.insertRecord rankTable $ RankRecord () rankValue)
-             orvilleEnv
+      _ <- insertNewRecord orvilleEnv (RankRecord () rankValue)
       _ <- checkAndUpdateTotalRank
              langExt
              rankValue
@@ -133,55 +131,6 @@ rankPath orvilleEnv request respond = do
       respond (thankYouRes $ (show $ rankInt rankValue))
     (_, _) ->
       indexPath orvilleEnv respond (Just errorMessage)
-
-checkAndUpdateTotalRank :: ExtensionId
-                        -> Rank
-                        -> O.OrvilleEnv Postgres.Connection
-                        -> IO ()
-checkAndUpdateTotalRank extenId (Rank newRankInt) orvilleEnv = do
-  mbRankTotalRecord <- findRankTotalRecord extenId orvilleEnv
-  case mbRankTotalRecord of
-    [] -> do
-      putStrLn "No record found"
-      _ <- O.runOrville
-             (O.insertRecord rankTotalTable $
-                RankTotalRecord
-                  { rankTotalId = ()
-                  , extensionId = extenId
-                  , rankCount   = 1
-                  , rankSum     = RankSum newRankInt
-                  }
-             )
-             orvilleEnv
-      pure ()
-    [rankTotalRecord] -> do
-      let
-        oldRankSum = (rankSumInt $ rankSum rankTotalRecord)
-      O.runOrville
-        (O.updateRecord
-          rankTotalTable
-          (rankTotalId rankTotalRecord)
-          (rankTotalRecord { rankTotalId = ()
-                           , rankCount   = (rankCount rankTotalRecord + 1)
-                           , rankSum     = (RankSum $ newRankInt + oldRankSum)
-                           }
-          )
-        )
-        orvilleEnv
-    _ -> putStrLn "Error multiple records found"
-
-
-
-findRankTotalRecord :: ExtensionId
-                    -> O.OrvilleEnv Postgres.Connection
-                    -> IO [RankTotalRecord RankTotalId]
-findRankTotalRecord eId orvilleEnv = do
-  O.runOrville
-    ( O.selectAll
-      rankTotalTable
-      (O.where_ (extensionIdField O..== eId))
-    )
-    orvilleEnv
 
 index :: Float -> Response
 index rankAvg = responseLBS
