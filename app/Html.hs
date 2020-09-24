@@ -52,15 +52,18 @@ thanksForRankHtml rankValue = H.docTypeHtml $ do
 languageExtensionView :: LanguageExtension -> Float -> H.Html
 languageExtensionView lE avg = H.docTypeHtml $ do
   H.head $ do
-    H.title $ H.toHtml $ name lE
+    H.link H.! A.rel "stylesheet" H.! A.type_ "text/css" H.! A.href "mainCss"
   H.body $ do
-    H.p $ H.toHtml $ "Name : " <> (name lE)
-    H.p $ H.toHtml $ "Descriptiion : " <> (description lE)
-    H.p $ H.toHtml $ "Ussage : " <> (ussage lE)
-    H.p $ H.toHtml $ "Rank Avg : " <> (show avg)
-    H.p "Url : "
-    H.a $ H.toHtml (url lE)
-    H.p $ rankSelect lE
+    H.toHtml $ H.div H.! A.class_ "container" $ do
+      H.h2 $ H.toHtml $ name lE
+      H.toHtml $ H.div H.! A.class_ "Extension" $ do
+        H.p $ H.toHtml $ "Name : " <> (name lE)
+        H.p $ H.toHtml $ "Descriptiion : " <> (description lE)
+        H.p $ H.toHtml $ "Ussage : " <> (ussage lE)
+        H.p $ H.toHtml $ "Rank Avg : " <> (show avg)
+        H.p "Url : "
+        H.a $ H.toHtml (url lE)
+        H.p $ rankSelect lE
 
 languageExtensionErrorView :: LanguageExtension -> String -> Float -> H.Html
 languageExtensionErrorView lE errorString avg = H.docTypeHtml $ do
