@@ -30,6 +30,7 @@ dependencies:
 - bytestring
 - orville-postgresql
 - HDBC-postgresql
+- clay
 
 library:
   source-dirs: src
