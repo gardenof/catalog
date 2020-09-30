@@ -14,12 +14,12 @@ data RankRecord key = RankRecord
 data RankTotalRecord key =
   RankTotalRecord
     { rankTotalId   :: key
-    , extensionId   :: ExtensionId
+    , extensionId   :: ExtensionNameId
     , rankCount     :: RankCount
     , rankSum       :: RankSum
     } deriving Show
 
-newtype ExtensionId = ExtensionId T.Text deriving Show
+newtype ExtensionNameId = ExtensionNameId T.Text deriving Show
 
 newtype Rank = Rank
   { rankInt :: Int32
@@ -45,9 +45,9 @@ validRank :: Maybe ByteString -> Maybe Rank
 validRank maBs =
   Rank <$> validNumberValue maBs
 
-validExtension :: Maybe ByteString -> Maybe ExtensionId
+validExtension :: Maybe ByteString -> Maybe ExtensionNameId
 validExtension maBs =
-  ExtensionId <$>  (T.pack <$> validString maBs)
+  ExtensionNameId <$>  (T.pack <$> validString maBs)
 
 validString :: Maybe ByteString -> Maybe String
 validString maBs =
@@ -63,3 +63,26 @@ errorMessage :: String
 errorMessage =
   "Sorry something went wrong, please try again."
 
+newtype ExtensionId = ExtensionId
+  { extensionIdInt :: Int32
+  } deriving (Show, Eq, Ord)
+
+newtype ExtensionName = ExtensionName T.Text
+
+extensionNameToText :: ExtensionName -> T.Text
+extensionNameToText (ExtensionName extensionName) =
+  extensionName
+
+newtype ExtensionDescription = ExtensionDescription T.Text
+
+extensionDescriptionToText :: ExtensionDescription -> T.Text
+extensionDescriptionToText (ExtensionDescription extensionDescription) =
+  extensionDescription
+
+data ExtensionRecord key =
+  ExtensionRecord
+    { extensionRecordId           :: key
+    , extensionRecordNameId       :: ExtensionNameId
+    , extensionRecordName         :: ExtensionName
+    , extensionRecordDescription :: ExtensionDescription
+    }

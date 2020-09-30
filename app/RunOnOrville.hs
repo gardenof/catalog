@@ -14,7 +14,7 @@ insertNewRecord :: O.OrvilleEnv Postgres.Connection -> RankRecord () -> IO (Rank
 insertNewRecord env rankValue =
   O.runOrville (O.insertRecord rankTable $ rankValue) env
 
-checkAndUpdateTotalRank :: ExtensionId
+checkAndUpdateTotalRank :: ExtensionNameId
                         -> Rank
                         -> O.OrvilleEnv Postgres.Connection
                         -> IO ()
@@ -50,14 +50,14 @@ checkAndUpdateTotalRank extenId (Rank newRankInt) orvilleEnv = do
         orvilleEnv
     _ -> putStrLn "Error multiple records found"
 
-findRankTotalRecord :: ExtensionId
+findRankTotalRecord :: ExtensionNameId
                     -> O.OrvilleEnv Postgres.Connection
                     -> IO [RankTotalRecord RankTotalId]
 findRankTotalRecord eId orvilleEnv = do
   O.runOrville
     ( O.selectAll
       rankTotalTable
-      (O.where_ (extensionIdField O..== eId))
+      (O.where_ (extensionIdNameField O..== eId))
     )
     orvilleEnv
 

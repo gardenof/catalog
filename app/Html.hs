@@ -58,7 +58,7 @@ languageExtensionView lE avg = H.docTypeHtml $ do
       H.h2 $ H.toHtml $ name lE
       H.toHtml $ H.div H.! A.class_ "Extension" $ do
         H.p $ H.toHtml $ "Name : " <> (name lE)
-        H.p $ H.toHtml $ "Descriptiion : " <> (description lE)
+        H.p $ H.toHtml $ "Description : " <> (description lE)
         H.p $ H.toHtml $ "Ussage : " <> (ussage lE)
         H.p $ H.toHtml $ "Rank Avg : " <> (show avg)
         H.p "Url : "
@@ -72,7 +72,7 @@ languageExtensionErrorView lE errorString avg = H.docTypeHtml $ do
   H.body $ do
     H.p $ H.toHtml $ "Error Message = " <> errorString
     H.p $ H.toHtml $ "Name : " <> (name lE)
-    H.p $ H.toHtml $ "Descriptiion : " <> (description lE)
+    H.p $ H.toHtml $ "Description : " <> (description lE)
     H.p $ H.toHtml $ "Ussage : " <> (ussage lE)
     H.p $ H.toHtml $ "Rank Avg : " <> (show avg)
     H.p "Url : "

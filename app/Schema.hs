@@ -17,6 +17,7 @@ createCatalogConnectionPool =
 allSchemas :: O.SchemaDefinition
 allSchemas = [ O.Table rankTable
              , O.Table rankTotalTable
+             , O.Table extensionTable
              ]
 
 rankIdField :: O.FieldDefinition RankId
@@ -55,7 +56,7 @@ rankTotalTable =
       , O.tblMapper =
           RankTotalRecord
             <$> O.readOnlyField rankTotalIdField
-            <*> O.attrField extensionId extensionIdField
+            <*> O.attrField extensionId extensionIdNameField
             <*> O.attrField rankCount rankCountField
             <*> O.attrField rankSum rankSumField
       , O.tblGetKey = rankTotalId
@@ -78,7 +79,40 @@ rankSumField =
   O.int32Field "rank_sum" `O.withConversion`
   O.convertSqlType rankSumInt RankSum
 
+extensionIdNameField :: O.FieldDefinition ExtensionNameId
+extensionIdNameField =
+  O.textField "extension_id_name" 35 `O.withConversion`
+  O.convertSqlType extensionIdToText ExtensionNameId
+
+extensionNameField :: O.FieldDefinition ExtensionName
+extensionNameField =
+  O.textField "extension_name" 54 `O.withConversion`
+  O.convertSqlType extensionNameToText ExtensionName
+
+extensionDescriptionField :: O.FieldDefinition ExtensionDescription
+extensionDescriptionField =
+  O.textField "extension_id" 342 `O.withConversion`
+  O.convertSqlType extensionDescriptionToText ExtensionDescription
+
+extensionTable :: O.TableDefinition
+  (ExtensionRecord ExtensionId) (ExtensionRecord()) ExtensionId
+extensionTable =
+  O.mkTableDefinition $
+    O.TableParams
+      { O.tblName = "extension"
+      , O.tblPrimaryKey = extensionIdField
+      , O.tblMapper =
+        ExtensionRecord
+          <$> O.readOnlyField extensionIdField
+          <*> O.attrField extensionRecordNameId extensionIdNameField
+          <*> O.attrField extensionRecordName extensionNameField
+          <*> O.attrField extensionRecordDescription extensionDescriptionField
+      , O.tblGetKey = extensionRecordId
+      , O.tblSafeToDelete = []
+      , O.tblComments = O.noComments
+      }
+
 extensionIdField :: O.FieldDefinition ExtensionId
 extensionIdField =
-  O.textField "extension_id" 35 `O.withConversion`
-  O.convertSqlType extensionIdToText ExtensionId
+  O.automaticIdField "id" `O.withFlag` O.PrimaryKey `O.withConversion`
+  O.convertSqlType extensionIdInt ExtensionId
