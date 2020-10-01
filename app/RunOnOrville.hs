@@ -61,3 +61,8 @@ findRankTotalRecord eId orvilleEnv = do
     )
     orvilleEnv
 
+insertExtension :: O.OrvilleEnv Postgres.Connection
+                -> ExtensionRecord ()
+                -> IO (ExtensionRecord ExtensionId)
+insertExtension env extensionRecord =
+  O.runOrville (O.insertRecord extensionTable $ extensionRecord) env

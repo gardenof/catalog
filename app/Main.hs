@@ -13,6 +13,7 @@ import           Schema
 import           Types
 import           RunOnOrville
 import           Css
+import           SchemaData
 
 main :: IO ()
 main = do
@@ -33,7 +34,16 @@ app orvilleEnv request respond = do
     "/about"             -> respond aboutUs
     "/ranked"            -> rankPath orvilleEnv request respond
     "/mainCss"           -> respond mainCssPath
+    "/firstInsert"       -> insertPath orvilleEnv respond
     _                    -> respond notFound
+
+insertPath :: O.OrvilleEnv Postgres.Connection
+           -> (Response -> IO ResponseReceived)
+           -> IO ResponseReceived
+insertPath orvilleEnv respond = do
+  _ <- traverse (insertExtension orvilleEnv) firstSetOfExtensions
+
+  respond mainPath
 
 mainPath :: Response
 mainPath = responseLBS

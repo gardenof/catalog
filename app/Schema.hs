@@ -104,7 +104,7 @@ extensionTable =
       , O.tblMapper =
         ExtensionRecord
           <$> O.readOnlyField extensionIdField
-          <*> O.attrField extensionRecordNameId extensionIdNameField
+          <*> O.attrField extensionRecordNameId (extensionIdNameField `O.withFlag` O.Unique)
           <*> O.attrField extensionRecordName extensionNameField
           <*> O.attrField extensionRecordDescription extensionDescriptionField
       , O.tblGetKey = extensionRecordId
