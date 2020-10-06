@@ -1,19 +1,17 @@
 {-# LANGUAGE OverloadedStrings #-}
 import qualified Database.HDBC.PostgreSQL as Postgres
 import qualified Database.Orville.PostgreSQL as O
-import           Network.HTTP.Types
 import           Network.Wai
 import           Network.Wai.Handler.Warp (run)
 import           Network.Wai.Parse (parseRequestBody, lbsBackEnd)
-import qualified Text.Blaze.Html.Renderer.Utf8 as BHRU
 
-import           Html
-import           LanguageExtension
-import           Schema
-import           Types
-import           RunOnOrville
 import           Css
+import           LanguageExtension
+import           Response
+import           RunOnOrville
+import           Schema
 import           SchemaData
+import           Types
 
 main :: IO ()
 main = do
@@ -44,12 +42,6 @@ newMainPath orvilleEnv respond = do
   fristTenExtensions <- selectFristTenExtensions orvilleEnv
   respond $ newMain fristTenExtensions
 
-newMain :: [ExtensionRecord ExtensionId] -> Response
-newMain extensions = responseLBS
-  status200
-  [("Content-Type", "text/html")]
-  (BHRU.renderHtml (newMainHtml extensions))
-
 insertPath :: O.OrvilleEnv Postgres.Connection
            -> (Response -> IO ResponseReceived)
            -> IO ResponseReceived
@@ -57,12 +49,6 @@ insertPath orvilleEnv respond = do
   _ <- traverse (insertExtension orvilleEnv) firstSetOfExtensions
 
   respond mainPath
-
-mainPath :: Response
-mainPath = responseLBS
-    status200
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml mainHtml )
 
 rankTotalAverage :: [RankTotalRecord RankTotalId] -> Float
 rankTotalAverage rankRecordList = do
@@ -95,18 +81,6 @@ languageExtensionPath orvilleEnv respond lang mbErrorMessage = do
           lang
           (rankTotalAverage foundRankTotalRecord)
           eMessage
-
-languageExtensionRes :: LanguageExtension -> Float -> Response
-languageExtensionRes lang rankAvg = responseLBS
-    status200
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ languageExtensionView lang rankAvg)
-
-languageExtensionErrorRes :: LanguageExtension -> Float -> String -> Response
-languageExtensionErrorRes lang rankAvg message = responseLBS
-    status422
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ languageExtensionErrorView lang message rankAvg )
 
 indexPath :: O.OrvilleEnv Postgres.Connection
          -> (Response -> IO ResponseReceived)
@@ -142,28 +116,3 @@ rankPath orvilleEnv request respond = do
       respond (thankYouRes $ (show $ rankInt rankValue))
     (_, _) ->
       indexPath orvilleEnv respond (Just errorMessage)
-
-index :: Float -> Response
-index rankAvg = responseLBS
-    status200
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ languageExtensionView overLoadedStringInfo rankAvg)
-
-indexParameterError :: Float -> String -> Response
-indexParameterError rankAvg message = responseLBS
-    status422
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ languageExtensionErrorView overLoadedStringInfo message rankAvg )
-
-notFound :: Response
-notFound = responseLBS
-    status404
-    [("Content-Type", "text/plain")]
-    "404 - Not Found"
-
-thankYouRes :: String -> Response
-thankYouRes selectedRank = do
-  responseLBS
-    status200
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ thanksForRankHtml selectedRank)
