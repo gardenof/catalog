@@ -28,11 +28,10 @@ app :: O.OrvilleEnv Postgres.Connection
     -> IO ResponseReceived
 app orvilleEnv request respond = do
   case rawPathInfo request of
-    "/"                  -> newMainPath orvilleEnv respond
+    "/"                  -> newMainPath           orvilleEnv respond
     "/NegativeLiterals"  -> languageExtensionPath orvilleEnv respond negativeliteralsInfo Nothing
     "/OverloadedStrings" -> languageExtensionPath orvilleEnv respond overLoadedStringInfo Nothing
-    "/about"             -> respond aboutUs
-    "/ranked"            -> rankPath orvilleEnv request respond
+    "/ranked"            -> rankPath              orvilleEnv request respond
     "/mainCss"           -> respond mainCssPath
     "/firstInsert"       -> insertPath orvilleEnv respond
     _                    -> respond notFound
@@ -161,12 +160,6 @@ notFound = responseLBS
     status404
     [("Content-Type", "text/plain")]
     "404 - Not Found"
-
-aboutUs :: Response
-aboutUs = responseLBS
-    status200
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml aboutUsHtml)
 
 thankYouRes :: String -> Response
 thankYouRes selectedRank = do

@@ -62,14 +62,6 @@ mainHtml = H.docTypeHtml $ do
             \ single token and desugared as fromInteger (-123).\
             \ "
 
-aboutUsHtml :: H.Html
-aboutUsHtml = H.docTypeHtml $ do
-    H.head $ do
-        H.title $ "About Us"
-    H.body $ do
-        H.p "About Us Page"
-        H.p "trying to provide information"
-
 thanksForRankHtml :: String -> H.Html
 thanksForRankHtml rankValue = H.docTypeHtml $ do
   H.head $ do
