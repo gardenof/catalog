@@ -66,3 +66,13 @@ insertExtension :: O.OrvilleEnv Postgres.Connection
                 -> IO (ExtensionRecord ExtensionId)
 insertExtension env extensionRecord =
   O.runOrville (O.insertRecord extensionTable $ extensionRecord) env
+
+selectFristTenExtensions :: O.OrvilleEnv Postgres.Connection
+                         -> IO [ExtensionRecord ExtensionId]
+selectFristTenExtensions orvilleEnv = do
+  O.runOrville
+    ( O.selectAll
+      extensionTable
+      (O.limit 10)
+    )
+    orvilleEnv

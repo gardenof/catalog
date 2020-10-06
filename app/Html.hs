@@ -5,8 +5,37 @@ import qualified Text.Blaze.Html5 as H
 import qualified Text.Blaze.Html5.Attributes as A
 
 import           LanguageExtension
+import           Types
 
-mainHtml:: H.Html
+
+newMainHtml :: [ExtensionRecord ExtensionId] -> H.Html
+newMainHtml extensions = H.docTypeHtml $ do
+  H.head $ do
+    H.link H.! A.rel "stylesheet" H.! A.type_ "text/css" H.! A.href "mainCss"
+  H.body $ do
+    H.div H.! A.class_ "container" $
+      H.div H.! A.class_ "Extensions" $ do
+        H.h2 $ "Language Extensions"
+        extensionDivs extensions
+
+extensionDivs :: [ExtensionRecord ExtensionId] -> H.Html
+extensionDivs list =
+  case list of
+    [] -> H.toHtml (""::String)
+    x:xs -> do
+      mainExtensionDiv x
+      extensionDivs xs
+
+mainExtensionDiv :: ExtensionRecord ExtensionId -> H.Html
+mainExtensionDiv extensionRecord = do
+  let extensionNameId = (extensionIdToText $ extensionRecordNameId extensionRecord)
+      extensionName = (extensionNameToText $ extensionRecordName extensionRecord)
+      extensionDescription = (extensionDescriptionToText $ extensionRecordDescription extensionRecord)
+  H.toHtml $ H.div H.! A.class_ "Extension" $ do
+    H.h3 $ H.a H.! A.href (H.toValue extensionNameId) $ (H.toHtml extensionName)
+    H.p $ H.toHtml extensionDescription
+
+mainHtml :: H.Html
 mainHtml = H.docTypeHtml $ do
   H.head $ do
     H.link H.! A.rel "stylesheet" H.! A.type_ "text/css" H.! A.href "mainCss"

@@ -28,7 +28,7 @@ app :: O.OrvilleEnv Postgres.Connection
     -> IO ResponseReceived
 app orvilleEnv request respond = do
   case rawPathInfo request of
-    "/"                  -> respond mainPath
+    "/"                  -> newMainPath orvilleEnv respond
     "/NegativeLiterals"  -> languageExtensionPath orvilleEnv respond negativeliteralsInfo Nothing
     "/OverloadedStrings" -> languageExtensionPath orvilleEnv respond overLoadedStringInfo Nothing
     "/about"             -> respond aboutUs
@@ -36,6 +36,20 @@ app orvilleEnv request respond = do
     "/mainCss"           -> respond mainCssPath
     "/firstInsert"       -> insertPath orvilleEnv respond
     _                    -> respond notFound
+
+
+newMainPath :: O.OrvilleEnv Postgres.Connection
+            -> (Response -> IO ResponseReceived)
+            -> IO ResponseReceived
+newMainPath orvilleEnv respond = do
+  fristTenExtensions <- selectFristTenExtensions orvilleEnv
+  respond $ newMain fristTenExtensions
+
+newMain :: [ExtensionRecord ExtensionId] -> Response
+newMain extensions = responseLBS
+  status200
+  [("Content-Type", "text/html")]
+  (BHRU.renderHtml (newMainHtml extensions))
 
 insertPath :: O.OrvilleEnv Postgres.Connection
            -> (Response -> IO ResponseReceived)
