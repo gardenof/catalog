@@ -31,10 +31,3 @@ notFound = responseLBS
     status404
     [("Content-Type", "text/plain")]
     "404 - Not Found"
-
-thankYouRes :: String -> Response
-thankYouRes selectedRank = do
-  responseLBS
-    status200
-    [("Content-Type", "text/html")]
-    (BHRU.renderHtml $ thanksForRankHtml selectedRank)

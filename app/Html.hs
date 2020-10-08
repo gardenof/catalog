@@ -77,11 +77,3 @@ rankSelectView extensionRecord = do
         H.option H.! A.value "1" $ H.toHtml ("1 star"::String)
       H.input H.! A.type_ "hidden" H.! A.name "exetnsion" H.! A.value (H.toValue (extensionNameId))
       H.input H.! A.type_ "submit"
-
-thanksForRankHtml :: String -> H.Html
-thanksForRankHtml rankValue = H.docTypeHtml $ do
-  H.head $ do
-    H.title "Thank You"
-  H.body $ do
-    H.p "Thank you for Rank"
-    H.p $ H.toHtml $ "Your ranked it a " <> rankValue

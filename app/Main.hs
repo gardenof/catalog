@@ -81,9 +81,18 @@ rankPath orvilleEnv request respond = do
              langExt
              rankValue
              orvilleEnv
-      respond (thankYouRes $ (show $ rankInt rankValue))
+      indexPath
+        orvilleEnv
+        respond $ Just $ thanksYouRankMessage rankValue langExt
     (_, _) ->
       indexPath orvilleEnv respond Nothing
+
+thanksYouRankMessage :: Rank -> ExtensionNameId -> String
+thanksYouRankMessage (Rank rankVal) (ExtensionNameId extensionNameIdVal) =
+  "Thank you for rating "
+  <> (show extensionNameIdVal)
+  <> " a "
+  <> (show rankVal)
 
 insertPath :: O.OrvilleEnv Postgres.Connection
            -> (Response -> IO ResponseReceived)
