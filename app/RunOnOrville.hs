@@ -76,3 +76,14 @@ selectFristTenExtensions orvilleEnv = do
       (O.limit 10)
     )
     orvilleEnv
+
+selectExtension :: O.OrvilleEnv Postgres.Connection
+                -> ExtensionNameId
+                -> IO (Maybe (ExtensionRecord ExtensionId))
+selectExtension orvilleEnv extensionNameId = do
+  O.runOrville
+    ( O.selectFirst
+      extensionTable
+      (O.where_ $ extensionIdNameField O..== extensionNameId)
+    )
+    orvilleEnv

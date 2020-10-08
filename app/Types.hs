@@ -67,6 +67,10 @@ newtype ExtensionId = ExtensionId
   { extensionIdInt :: Int32
   } deriving (Show, Eq, Ord)
 
+extensionIdToText :: ExtensionNameId -> T.Text
+extensionIdToText (ExtensionNameId extensionIdText) =
+  extensionIdText
+
 newtype ExtensionName = ExtensionName T.Text
 
 extensionNameToText :: ExtensionName -> T.Text

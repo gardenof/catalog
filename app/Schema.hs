@@ -3,7 +3,6 @@ module Schema where
 import qualified  Database.Orville.PostgreSQL as O
 import qualified  Database.Orville.PostgreSQL.Connection as O
 
-import            LanguageExtension
 import            Types
 
 createCatalogOrvilleEnv :: IO (O.OrvilleEnv O.Connection)
